@@ -4,7 +4,7 @@ var gtty = {
 		parseSecret: 'pe5A8m1Pebn0xfLi1oeBhvdkTiHBHYd0s21QdlkK',
 		facebookId: '446923285377787',
 		facebookNamespace: 'mozilla-dev',
-		facebookPermissions: 'email',
+		facebookPermissions: 'email,user_photos',
 		soundcloudId: '2e5fbc52194941846c664a23bf45cc16'
 	},
 	init: {
@@ -21,7 +21,6 @@ var gtty = {
 					xfbml      : true  // parse XFBML tags on this page?
 				});
 				FB.getLoginStatus(function(response) {
-					console.log(response);
 					if (response.status === 'connected') {
 						gtty.user.logins({
 							facebook: false,
@@ -44,8 +43,32 @@ var gtty = {
 			});
 		}
 	},
+	getData: {},
 	get: function(object, callback){
-
+		this.getData = {};
+		if(object.facebook != 'me'){
+			return false;
+		}
+		var facebookDone = false;
+		var youtubeDone = false;
+		var soundcloudDone = false;
+		gtty.user.facebook.getPhotos(object.facebook, function(){
+			facebookDone = true;
+			ensureCallback();
+		});
+		gtty.user.youtube.getUserVideos(object.youtube, function(){
+			youtubeDone = true;
+			ensureCallback();
+		});
+		gtty.user.soundcloud.getUserData(object.soundcloud, function(){
+			soundcloudDone = true;
+			ensureCallback();
+		});
+		function ensureCallback(){
+			if(facebookDone === true && youtubeDone === true && soundcloudDone === true){
+				callback(gtty.getData);
+			}		
+		}
 	},
 	user: {
 		logins: function(object){
@@ -108,34 +131,43 @@ var gtty = {
 						console.log("Userdata failed to save");
 					}
 				});
+			},
+			getPhotos: function getPhotos(user, callback){
+				FB.api(user + '/photos', function(response){
+					gtty.getData.facebook = response;
+					callback();
+				});
 			}
 		},
 		youtube: {
-			getUserData: function getUserData(username){
+			getUserData: function getUserData(username, callback){
 				var _this = this;
 				var url = "http://gdata.youtube.com/feeds/api/users/" + username + "?v=2&alt=json";
 
 				$.ajax({
 					url: url,
-					success: _this.processUserData,
+					success: function(data){
+						gtty.getData.youtube = data;
+						callback();
+					},
 					dataType: 'json'
 				});
 			},
 			processUserData: function processUserData(data, textStatus, jqXHR){
 				console.log(data);
 			},
-			getUserVideos: function getUserVideos(username){
+			getUserVideos: function getUserVideos(username, callback){
 				var _this = this;
 				var url = "http://gdata.youtube.com/feeds/api/users/" + username + "/uploads?v=2&alt=json";
 
 				$.ajax({
 					url: url,
-					success: _this.processUserVideos,
+					success: function(data){
+						gtty.getData.youtube = data;
+						callback();
+					},
 					dataType: 'json'
 				});
-			},
-			processUserVideos: function processUserVideos(data, textStatus, jqXHR){
-				console.log(data);
 			},
 			saveUserData: function(userData){
 				var user = Parse.User.current();
@@ -161,9 +193,10 @@ var gtty = {
 					console.log(users);
 				});
 			},
-			getUserData: function getUserData(userId){
+			getUserData: function getUserData(userId, callback){
 				SC.get('/users/' + userId, function(user) {
-					console.log(user);
+					gtty.getData.soundcloud = user;
+					callback();
 				});
 			},
 			saveUserData: function(userData){
@@ -187,10 +220,12 @@ gtty.init.parse(function(){
 	gtty.init.soundcloud();
 });
 
-gtty.get({
-	facebook: 'me', //ALWAYS USE ME
-	youtube: 'user', //DEFINE USERNAME
-	soundcloud: 'user' //DEFINE USERNAME
-}, function(json){
-
-});
+function runGet(){
+	gtty.get({
+		facebook: 'me', //ALWAYS USE ME
+		youtube: 'CodeOrg', //DEFINE USERNAME
+		soundcloud: 'littleboots' //DEFINE USERNAME
+	}, function(json){
+		console.log(json);
+	});
+};
