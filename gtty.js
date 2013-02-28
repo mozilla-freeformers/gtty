@@ -4,7 +4,8 @@ var gtty = {
 		parseSecret: 'pe5A8m1Pebn0xfLi1oeBhvdkTiHBHYd0s21QdlkK',
 		facebookId: '446923285377787',
 		facebookNamespace: 'mozilla-dev',
-		facebookPermissions: 'email'
+		facebookPermissions: 'email',
+		soundcloudId: '2e5fbc52194941846c664a23bf45cc16'
 	},
 	init: {
 		parse: function parse(callback){
@@ -20,6 +21,11 @@ var gtty = {
 					xfbml      : true  // parse XFBML tags on this page?
 				});
 			};
+		},
+		soundcloud: function soundcloud(){
+			SC.initialize({
+				client_id: gtty._config.soundcloudId
+			});
 		}
 	},
 	user: {
@@ -62,10 +68,56 @@ var gtty = {
 					}
 				});
 			}
+		},
+		youtube: {
+			getUserData: function getUserData(username){
+				var _this = this;
+				var url = "http://gdata.youtube.com/feeds/api/users/" + username + "?v=2&alt=json";
+
+				$.ajax({
+					url: url,
+					success: _this.processUserData,
+					dataType: 'json'
+				});
+			},
+			processUserData: function processUserData(data, textStatus, jqXHR){
+				console.log(data);
+			},
+			getUserVideos: function getUserVideos(username){
+				var _this = this;
+				var url = "http://gdata.youtube.com/feeds/api/users/" + username + "/uploads?v=2&alt=json";
+
+				$.ajax({
+					url: url,
+					success: _this.processUserVideos,
+					dataType: 'json'
+				});
+			},
+			processUserVideos: function processUserVideos(data, textStatus, jqXHR){
+				console.log(data);
+			}
+		},
+		soundcloud: {
+			streamSong: function streamSong(trackId){
+				SC.stream("/tracks/" + trackId, {
+					autoPlay: true
+				});
+			},
+			findUser: function findUser(name){
+				SC.get('/users', { q: name}, function(users) {
+					console.log(users);
+				});
+			},
+			getUserData: function getUserData(userId){
+				SC.get('/users/' + userId, function(user) {
+					console.log(user);
+				});
+			}
 		}
 	}
 }
 
 gtty.init.parse(function(){
 	gtty.init.facebook();
+	gtty.init.soundcloud();
 });
