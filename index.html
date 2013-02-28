@@ -1,8 +1,10 @@
 <html>
 	<head>
 		<title>Connection lib</title>
-		<script src="http://www.parsecdn.com/js/parse-1.2.1.min.js"></script>
+		<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+		<script type="text/javascript" src="http://www.parsecdn.com/js/parse-1.2.1.min.js"></script>
 		<script type="text/javascript" src="//connect.facebook.net/en_US/all.js"></script>
+		<script type="text/javascript" src="//connect.soundcloud.com/sdk.js"></script>
 		<script src="gtty.js"></script>
 	</head>
 	<body>
@@ -10,7 +12,7 @@
 		<h1>Mozilla hackday!</h1>
 		<ul>
 			<li><a href="#" onclick="javascript:void(0); gtty.user.facebook.connect();">Connect with Facebook</a></li>
-			<li><a href="#" onclick="javascript:void(0);">Connect with Youtube</a></li>
-			<li><a href="#" onclick="javascript:void(0);">Connect with Soundcloud</a></li>
+			<li><a href="#" onclick="javascript:void(0); gtty.user.youtube.getUserVideos('CodeOrg');">Connect with Youtube</a></li>
+			<li><a href="#" onclick="javascript:void(0); gtty.user.soundcloud.getUserData('2076781')">Connect with Soundcloud</a></li>
 	</body>
 </html>
