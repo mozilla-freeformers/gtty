@@ -194,7 +194,7 @@ var gtty = {
 				});
 			},
 			getUserData: function getUserData(userId, callback){
-				SC.get('/users/' + userId, function(user) {
+				SC.get('/users/' + userId + '/tracks', function(user) {
 					gtty.getData.soundcloud = user;
 					callback();
 				});
@@ -212,6 +212,20 @@ var gtty = {
 				});
 			}
 		}
+	},
+	detect: function detect(string){
+		var returnString = string;
+		var imgRegex = new RegExp(/(http(?:s)?:\/\/.*\.(?:png|jpg|gif))/i);
+		var youtubeRegex = new RegExp(/(http(?:s)?:\/\/.*(?:youtube\.com))/i);
+		var soundcloudRegex = new RegExp(/(http(?:s)?:\/\/.*(?:api\.soundcloud\.com)\/(?:tracks)\/)/i);
+		if(imgRegex.test(returnString) === true){
+			returnString = '<img width="100%" src="' + returnString + '" />';
+		} else if(youtubeRegex.test(returnString) === true){
+			returnString = '<iframe width="100%" height="100%" src="' + returnString + '"></iframe>';
+		} else if (soundcloudRegex.test(returnString) === true){
+			returnString = '<iframe width="100%" height="166" scrolling="no" frameborder="no" src="https://w.soundcloud.com/player/?url=' + returnString + '"></iframe>';
+		}
+		return returnString;
 	}
 }
 
@@ -227,5 +241,7 @@ function runGet(){
 		soundcloud: 'littleboots' //DEFINE USERNAME
 	}, function(json){
 		console.log(json);
+		$('body').append(gtty.detect("http://www.youtube.com/v/qYZF6oIZtfc?version=3&f=user_uploads&app=youtube_gdata"));
+
 	});
 };
